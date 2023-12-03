@@ -5,6 +5,7 @@ import re
 import psycopg2
 from psycopg2 import pool
 import concurrent.futures
+from langdetect import detect
 
 num_threads = 5
 
@@ -58,8 +59,8 @@ def insert_data(values):
     try:
         query = f"""
             WITH inserted_key AS (
-                INSERT INTO public.markov_key (category, markov_key)
-                VALUES ('SONG', %s)
+                INSERT INTO public.markov_key (category, word_source, markov_key)
+                VALUES ('SONG', %s, %s)
                 ON CONFLICT (category,markov_key) DO UPDATE SET category = EXCLUDED.category
                 RETURNING id
             )
@@ -74,7 +75,6 @@ def insert_data(values):
         connection.commit()
 
     except psycopg2.Error as e:
-        # Handle PostgreSQL exceptions here
         print("Error:", e)
 
     finally:
@@ -85,10 +85,10 @@ def process_chunk(chunk):
     for values in chunk:
         insert_data(values)
 
-def load_tokens(token_array):
+def load_tokens(file_path, token_array):
     threads = []
 
-    tuples_pairs = [(token_array[i], token_array[i + 1]) for i in range(len(token_array) - 1)]
+    tuples_pairs = [(file_path, token_array[i], token_array[i + 1]) for i in range(len(token_array) - 1)]
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(process_chunk, tuples_pairs)]
@@ -101,17 +101,32 @@ def read_and_load_files_data(directory_path):
     all_text = ""
 
     for root, dirs, files in os.walk(directory_path):
+        # ending = 10
+        # current = 0
+        # stopping = False
         for file in files:
             file_path = os.path.join(root, file)
 
             with open(file_path, 'r', encoding='utf-8') as f:
                 print(file)
                 file_content = f.read()
+
+                if detect(file_content) != "en":
+                    continue
+
                 tokenized_content = tokenize_strings(file_content)
                 clean_content = clean_tokens(tokenized_content)
 
-                load_tokens(clean_content)
+                load_tokens(file, clean_content)
 
+                # if current == ending:
+                #     stopping = True
+                #     break
+                # else:
+                #     current += 1
+
+        # if stopping:
+        #     break
 
 def handler(event, context):
     directory_path = "C:\\Users\\Jon\\Desktop\\software_eng\\phrase-bot-data-retrieval-batch\\data\\"
