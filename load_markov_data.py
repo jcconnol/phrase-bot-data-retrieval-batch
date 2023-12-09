@@ -13,7 +13,7 @@ db_params = {
     'dbname': "postgres",
     'user': "markov_chain_app",
     'password': "",
-    'host': "192.168.1.113",
+    'host': "johncc.local",
     'port': "5432"
 }
 

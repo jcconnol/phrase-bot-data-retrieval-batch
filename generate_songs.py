@@ -21,6 +21,7 @@ def upload_to_s3(folder, file_name, data):
 
 def get_initial_seed_word(category):
     word = ""
+    connection = ""
     try:
         connection = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
 
@@ -80,9 +81,16 @@ def get_second_word_from_db(category, initial_key):
 
         return word
 
+def count_objects_in_bucket():
+    s3 = boto3.client('s3')
+    objects = s3.list_objects_v2(Bucket=bucket_name)
+    object_count = objects.get('KeyCount', 0)
+
+    return object_count
+
 def main():
-    max_retries = 3
-    for run_num in range(15):
+    max_retries = 10
+    for run_num in range(count_objects_in_bucket(), 2000):
         print(run_num)
         retry_count = 0
         while retry_count < max_retries:
@@ -99,7 +107,7 @@ def main():
 
             if len(song.split(' ')) > 100:
                 print(run_num)
-                file_name = f"testing_{run_num}.txt"
+                file_name = f"markov_gen_song_{run_num}_v1.txt"
                 upload_to_s3("songs/", file_name, song)
                 break
             else:
@@ -108,7 +116,7 @@ def main():
                 retry_count += 1
 
         if retry_count == max_retries:
-            print(f"Max retries reached for iteration {_}")
+            print(f"Max retries reached for iteration {run_num}")
 
 if __name__ == '__main__':
     main()
