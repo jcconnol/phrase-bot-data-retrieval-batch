@@ -12,7 +12,7 @@ num_threads = 5
 db_params = {
     'dbname': "postgres",
     'user': "markov_chain_app",
-    'password': "",
+    'password': os.environ.get("DB_PASSWORD"),
     'host': "johncc.local",
     'port': "5432"
 }
@@ -129,7 +129,7 @@ def read_and_load_files_data(directory_path):
         #     break
 
 def handler(event, context):
-    directory_path = "C:\\Users\\Jon\\Desktop\\software_eng\\phrase-bot-data-retrieval-batch\\data\\"
+    directory_path = "C:\\Users\\Jon\\Desktop\\software_eng\\phrase-bot-data-retrieval-batch\\songs\\"
     read_and_load_files_data(directory_path)
     connection_pool.closeall()
 

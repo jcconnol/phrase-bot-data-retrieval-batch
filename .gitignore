@@ -1,3 +1,5 @@
 
 .env
-data/lyrics/
+poems/*
+songs/*
+tweets/*

@@ -95,25 +95,25 @@ def main():
         print(run_num)
         retry_count = 0
         while retry_count < max_retries:
-            song = get_initial_seed_word("SONG")
-            print(song)
+            tweet = get_initial_seed_word("TWEET")
+            print(tweet)
             for iteration in range(150):
-                last_song_word = song.split()[-1]
-                word = get_second_word_from_db("SONG", last_song_word)
+                last_tweet_word = tweet.split()[-1]
+                word = get_second_word_from_db("TWEET", last_tweet_word)
 
                 if word == "" or word == None:
                     break
 
-                song = song + " " + word
+                tweet = tweet + " " + word
 
-            if len(song.split(' ')) > 100:
+            if len(tweet.split(' ')) > 100:
                 print(run_num)
-                file_name = f"markov_gen_song_{run_num}_v1.txt"
-                upload_to_s3("songs/", file_name, song)
+                file_name = f"markov_gen_tweet_{run_num}_v1.txt"
+                upload_to_s3("tweets/", file_name, tweet)
                 break
             else:
                 print("retrying")
-                print(len(song.split()))
+                print(len(tweet.split()))
                 retry_count += 1
 
         if retry_count == max_retries:
