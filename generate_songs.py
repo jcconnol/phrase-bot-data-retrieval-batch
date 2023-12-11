@@ -5,7 +5,7 @@ import os
 dbname = "postgres"
 user = "markov_chain_app"
 password = os.environ.get("DB_PASSWORD")
-host = "192.168.1.113"
+host = "johncc.local"
 port = "5432"
 
 bucket_name = "markov-chain-generations"
